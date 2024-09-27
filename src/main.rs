@@ -57,11 +57,11 @@ fn main() {
             "--bevy_plane_3d_retained",
             "--bevy_plane_3d_retained_combined",
             "--gizmos_immediate",
-            "--gizmos_immediate_nan",
+            // "--gizmos_immediate_nan",
             "--gizmos_immediate_continuous_polyline",
             "--bevy_vector_shapes_retained",
             "--bevy_vector_shapes_immediate",
-            "--bevy_polyline_retained",
+            "--bevy_polyline_retained_separate",
             "--bevy_polyline_retained_nan",
             "--bevy_polyline_retained_continuous_polyline",
         ] {
@@ -110,7 +110,7 @@ fn main() {
     if args.contains(&"--bevy_plane_3d_retained_combined".to_string()) {
         app.add_systems(Update, bevy_plane_3d_retained_combined);
     }
-    if args.contains(&"--bevy_polyline_retained".to_string()) {
+    if args.contains(&"--bevy_polyline_retained_separate".to_string()) {
         app.add_systems(Update, bevy_polyline_retained);
     }
     if args.contains(&"--bevy_polyline_retained_nan".to_string()) {
