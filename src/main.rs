@@ -308,7 +308,7 @@ fn line_count_tuner(
     let mut updated = false;
 
     if this_time_ms < 8.0 {
-        line_count.0 = (line_count.0 as f32 * 3.) as u32;
+        line_count.0 *= 2;
         update_count_event.send(UpdateCountEvent(line_count.0));
         updated = true;
         *stability = 0;
