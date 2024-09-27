@@ -50,13 +50,14 @@ fn main() {
         let program_name = &args[0];
         for b in [
             // "--bevy_lines_example_retained",
-            "--bevy_plane_3d_retained",
+            // "--bevy_plane_3d_retained",
             // "--bevy_plane_3d_retained_combined",
-            "--gizmos_immediate",
+            // "--gizmos_immediate",
             // "--gizmos_immediate_nan",
-            "--gizmos_immediate_continuous_polyline",
+            // "--gizmos_immediate_continuous_polyline",
             "--gizmos_retained",
             "--gizmos_retained_separate",
+            "--gizmos_retained_continuous_polyline",
             // "--bevy_vector_shapes_retained",
             // "--bevy_vector_shapes_immediate",
             // "--bevy_polyline_retained",
@@ -144,6 +145,12 @@ fn main() {
     }
     if args.contains(&"--gizmos_retained_separate".to_string()) {
         app.add_systems(Update, gizmos_retained_separate);
+    }
+    if args.contains(&"--gizmos_retained".to_string()) {
+        app.add_systems(Update, gizmos_retained);
+    }
+    if args.contains(&"--gizmos_retained_continuous_polyline".to_string()) {
+        app.add_systems(Update, gizmos_retained_continuous_polyline);
     }
 
     app.run();
@@ -301,7 +308,7 @@ fn line_count_tuner(
     let mut updated = false;
 
     if this_time_ms < 8.0 {
-        line_count.0 *= 2;
+        line_count.0 = (line_count.0 as f32 * 3.) as u32;
         update_count_event.send(UpdateCountEvent(line_count.0));
         updated = true;
         *stability = 0;

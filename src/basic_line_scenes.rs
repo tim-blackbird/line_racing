@@ -284,6 +284,36 @@ pub fn gizmos_retained_separate(
     }
 }
 
+pub fn gizmos_retained_continuous_polyline(
+    mut commands: Commands,
+    mut linegizmos: ResMut<Assets<LineGizmo>>,
+
+    mut update_count_event: EventReader<UpdateCountEvent>,
+) {
+    let Some(count) = update_count_event.read().last() else {
+        return;
+    };
+
+    // Draws a single polyline (instead of individual lines).
+    let mut vertices = Vec::with_capacity(count.0 as usize);
+    let mut line_gen = ContinuousRandomLineGenerator::default();
+    for _ in 0..count.0 {
+        let line = line_gen.next_line();
+        vertices.push(line.0);
+    }
+
+    let mut linegizmo = LineGizmo::default();
+
+    linegizmo.linestrip(vertices, Color::WHITE);
+
+    commands
+        .spawn(LineGizmoBundle {
+            linegizmo: linegizmos.add(linegizmo),
+            ..default()
+        })
+        .insert(RetainedLines);
+}
+
 // pub fn bevy_plane_3d_retained_combined(
 //     mut commands: Commands,
 //     mut meshes: ResMut<Assets<Mesh>>,
