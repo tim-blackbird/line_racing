@@ -7,12 +7,7 @@ pub mod sampling;
 use core::f32;
 use std::{f32::consts::TAU, process::Command, time::Instant};
 
-use basic_line_scenes::{
-    bevy_lines_example_retained, bevy_plane_3d_retained, bevy_plane_3d_retained_combined,
-    bevy_polyline_retained, bevy_polyline_retained_continuous_polyline, bevy_polyline_retained_nan,
-    bevy_vector_shapes_immediate, bevy_vector_shapes_retained, gizmos_immediate,
-    gizmos_immediate_continuous_polyline, gizmos_immediate_nan,
-};
+use basic_line_scenes::*;
 use bevy::{
     core::FrameCount,
     core_pipeline::tonemapping::Tonemapping,
@@ -23,8 +18,9 @@ use bevy::{
     winit::{UpdateMode, WinitSettings},
 };
 use bevy_lines_example::LineMaterial;
-use bevy_polyline::PolylinePlugin;
-use bevy_vector_shapes::prelude::*;
+
+// use bevy_polyline::PolylinePlugin;
+// use bevy_vector_shapes::prelude::*;
 
 #[derive(Resource)]
 pub struct BenchmarkAllMode;
@@ -53,17 +49,19 @@ fn main() {
     if args.contains(&"--benchmark".to_string()) {
         let program_name = &args[0];
         for b in [
-            "--bevy_lines_example_retained",
+            // "--bevy_lines_example_retained",
             "--bevy_plane_3d_retained",
-            "--bevy_plane_3d_retained_combined",
+            // "--bevy_plane_3d_retained_combined",
             "--gizmos_immediate",
-            "--gizmos_immediate_nan",
+            // "--gizmos_immediate_nan",
             "--gizmos_immediate_continuous_polyline",
-            "--bevy_vector_shapes_retained",
-            "--bevy_vector_shapes_immediate",
-            "--bevy_polyline_retained",
-            "--bevy_polyline_retained_nan",
-            "--bevy_polyline_retained_continuous_polyline",
+            "--gizmos_retained",
+            "--gizmos_retained_separate",
+            // "--bevy_vector_shapes_retained",
+            // "--bevy_vector_shapes_immediate",
+            // "--bevy_polyline_retained",
+            // "--bevy_polyline_retained_nan",
+            // "--bevy_polyline_retained_continuous_polyline",
         ] {
             let mut cmd = Command::new(program_name);
             cmd.arg(b).arg("--auto_bench");
@@ -107,30 +105,30 @@ fn main() {
     if args.contains(&"--bevy_plane_3d_retained".to_string()) {
         app.add_systems(Update, bevy_plane_3d_retained);
     }
-    if args.contains(&"--bevy_plane_3d_retained_combined".to_string()) {
-        app.add_systems(Update, bevy_plane_3d_retained_combined);
-    }
-    if args.contains(&"--bevy_polyline_retained".to_string()) {
-        app.add_systems(Update, bevy_polyline_retained);
-    }
-    if args.contains(&"--bevy_polyline_retained_nan".to_string()) {
-        app.add_systems(Update, bevy_polyline_retained_nan);
-    }
-    if args.contains(&"--bevy_polyline_retained_continuous_polyline".to_string()) {
-        app.add_systems(Update, bevy_polyline_retained_continuous_polyline);
-    }
-    if args.contains(&"--bevy_vector_shapes_retained".to_string()) {
-        app.add_systems(Update, bevy_vector_shapes_retained);
-        //if auto_count {
-        //    app.insert_resource(LineCount(10_000));
-        //}
-    }
-    if args.contains(&"--bevy_vector_shapes_immediate".to_string()) {
-        app.add_systems(Update, bevy_vector_shapes_immediate);
-        //if auto_count {
-        //    app.insert_resource(LineCount(10_000));
-        //}
-    }
+    // if args.contains(&"--bevy_plane_3d_retained_combined".to_string()) {
+    //     app.add_systems(Update, bevy_plane_3d_retained_combined);
+    // }
+    // if args.contains(&"--bevy_polyline_retained".to_string()) {
+    //     app.add_systems(Update, bevy_polyline_retained);
+    // }
+    // if args.contains(&"--bevy_polyline_retained_nan".to_string()) {
+    //     app.add_systems(Update, bevy_polyline_retained_nan);
+    // }
+    // if args.contains(&"--bevy_polyline_retained_continuous_polyline".to_string()) {
+    //     app.add_systems(Update, bevy_polyline_retained_continuous_polyline);
+    // }
+    // if args.contains(&"--bevy_vector_shapes_retained".to_string()) {
+    //     app.add_systems(Update, bevy_vector_shapes_retained);
+    //     //if auto_count {
+    //     //    app.insert_resource(LineCount(10_000));
+    //     //}
+    // }
+    // if args.contains(&"--bevy_vector_shapes_immediate".to_string()) {
+    //     app.add_systems(Update, bevy_vector_shapes_immediate);
+    //     //if auto_count {
+    //     //    app.insert_resource(LineCount(10_000));
+    //     //}
+    // }
     if args.contains(&"--gizmos_immediate".to_string()) {
         app.add_systems(Update, gizmos_immediate);
     }
@@ -139,6 +137,13 @@ fn main() {
     }
     if args.contains(&"--gizmos_immediate_continuous_polyline".to_string()) {
         app.add_systems(Update, gizmos_immediate_continuous_polyline);
+    }
+
+    if args.contains(&"--gizmos_retained".to_string()) {
+        app.add_systems(Update, gizmos_retained);
+    }
+    if args.contains(&"--gizmos_retained_separate".to_string()) {
+        app.add_systems(Update, gizmos_retained_separate);
     }
 
     app.run();
@@ -158,20 +163,19 @@ fn base_app(title: &str, disable_log: bool) -> App {
         default_plugins = default_plugins.disable::<LogPlugin>();
     }
     let mut app = App::new();
-    app.insert_resource(Msaa::Off)
-        .insert_resource(WinitSettings {
-            focused_mode: UpdateMode::Continuous,
-            unfocused_mode: UpdateMode::Continuous,
-        })
-        .add_plugins(default_plugins)
-        .add_plugins((
-            ShapePlugin::default(),
-            PolylinePlugin,
-            MaterialPlugin::<LineMaterial>::default(),
-        ))
-        .add_systems(Startup, camera)
-        .add_systems(Update, (benchmark, line_count_tuner))
-        .add_event::<UpdateCountEvent>();
+    app.insert_resource(WinitSettings {
+        focused_mode: UpdateMode::Continuous,
+        unfocused_mode: UpdateMode::Continuous,
+    })
+    .add_plugins(default_plugins)
+    .add_plugins((
+        // ShapePlugin::default(),
+        // PolylinePlugin,
+        MaterialPlugin::<LineMaterial>::default(),
+    ))
+    .add_systems(Startup, camera)
+    .add_systems(Update, (benchmark, line_count_tuner))
+    .add_event::<UpdateCountEvent>();
     app
 }
 
@@ -187,6 +191,7 @@ fn camera(
     commands.spawn(Camera3dBundle {
         transform: Transform::from_xyz(0., 0.0, 3.5).looking_at(Vec3::ZERO, Vec3::Y),
         tonemapping: Tonemapping::None,
+        msaa: Msaa::Off,
         ..default()
     });
     update_count_event.send(UpdateCountEvent(line_count.0));
