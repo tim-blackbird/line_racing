@@ -181,16 +181,14 @@ pub fn bevy_lines_example_retained(
         lines.push(line);
     }
     // Spawn a list of lines with start and end points for each lines
-    commands
-        .spawn(MaterialMeshBundle {
-            mesh: meshes.add(LineList { lines }),
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
-            material: materials.add(LineMaterial {
-                color: LinearRgba::WHITE,
-            }),
-            ..default()
-        })
-        .insert(RetainedLines);
+    commands.spawn((
+        Mesh3d(meshes.add(LineList { lines })),
+        Transform::from_xyz(0.0, 0.0, 0.0),
+        MeshMaterial3d(materials.add(LineMaterial {
+            color: LinearRgba::WHITE,
+        })),
+        RetainedLines,
+    ));
 }
 
 pub fn bevy_plane_3d_retained(
@@ -220,20 +218,18 @@ pub fn bevy_plane_3d_retained(
             Transform::from_translation(line.0 + n * len * 0.5).with_scale(vec3(1.0, 1.0, len));
         transform = transform.looking_at(line.1, vec3(0., 0.0, 3.5));
 
-        commands
-            .spawn(PbrBundle {
-                mesh: mesh.clone(),
-                material: material.clone(),
-                transform,
-                ..default()
-            })
-            .insert(RetainedLines);
+        commands.spawn((
+            Mesh3d(mesh.clone()),
+            MeshMaterial3d(material.clone()),
+            transform,
+            RetainedLines,
+        ));
     }
 }
 
 pub fn gizmos_retained(
     mut commands: Commands,
-    mut linegizmos: ResMut<Assets<LineGizmo>>,
+    mut linegizmos: ResMut<Assets<LineGizmoAsset>>,
     mut update_count_event: EventReader<UpdateCountEvent>,
 ) {
     let Some(count) = update_count_event.read().last() else {
@@ -242,7 +238,7 @@ pub fn gizmos_retained(
 
     let mut line_gen = ContinuousRandomLineGenerator::default();
 
-    let mut linegizmo = LineGizmo::default();
+    let mut linegizmo = LineGizmoAsset::default();
 
     for _ in 0..count.0 {
         let line = line_gen.next_line();
@@ -250,8 +246,8 @@ pub fn gizmos_retained(
     }
 
     commands
-        .spawn(LineGizmoBundle {
-            linegizmo: linegizmos.add(linegizmo),
+        .spawn(LineGizmo {
+            handle: linegizmos.add(linegizmo),
             ..default()
         })
         .insert(RetainedLines);
@@ -259,7 +255,7 @@ pub fn gizmos_retained(
 
 pub fn gizmos_retained_separate(
     mut commands: Commands,
-    mut linegizmos: ResMut<Assets<LineGizmo>>,
+    mut linegizmos: ResMut<Assets<LineGizmoAsset>>,
     mut update_count_event: EventReader<UpdateCountEvent>,
 ) {
     let Some(count) = update_count_event.read().last() else {
@@ -271,13 +267,13 @@ pub fn gizmos_retained_separate(
     for _ in 0..count.0 {
         let line = line_gen.next_line();
 
-        let mut linegizmo = LineGizmo::default();
+        let mut linegizmo = LineGizmoAsset::default();
 
         linegizmo.line(line.0, line.1, Color::WHITE);
 
         commands
-            .spawn(LineGizmoBundle {
-                linegizmo: linegizmos.add(linegizmo),
+            .spawn(LineGizmo {
+                handle: linegizmos.add(linegizmo),
                 ..default()
             })
             .insert(RetainedLines);
@@ -286,7 +282,7 @@ pub fn gizmos_retained_separate(
 
 pub fn gizmos_retained_continuous_polyline(
     mut commands: Commands,
-    mut linegizmos: ResMut<Assets<LineGizmo>>,
+    mut linegizmos: ResMut<Assets<LineGizmoAsset>>,
 
     mut update_count_event: EventReader<UpdateCountEvent>,
 ) {
@@ -302,13 +298,13 @@ pub fn gizmos_retained_continuous_polyline(
         vertices.push(line.0);
     }
 
-    let mut linegizmo = LineGizmo::default();
+    let mut linegizmo = LineGizmoAsset::default();
 
     linegizmo.linestrip(vertices, Color::WHITE);
 
     commands
-        .spawn(LineGizmoBundle {
-            linegizmo: linegizmos.add(linegizmo),
+        .spawn(LineGizmo {
+            handle: linegizmos.add(linegizmo),
             ..default()
         })
         .insert(RetainedLines);

@@ -3,6 +3,11 @@ name = "line_racing"
 version = "0.1.0"
 edition = "2021"
 
+[profile.optimized]
+inherits = "release"
+lto = true
+codegen-units = 1
+
 [dependencies]
 bevy = { path = "../bevy" }
 # bevy_local = 

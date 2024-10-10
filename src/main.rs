@@ -193,14 +193,13 @@ fn camera(
     line_count: Res<LineCount>,
 ) {
     for (_, config, _) in config_store.iter_mut() {
-        config.line_width = 1.0;
+        config.line.width = 1.0;
     }
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(0., 0.0, 3.5).looking_at(Vec3::ZERO, Vec3::Y),
-        tonemapping: Tonemapping::None,
-        msaa: Msaa::Off,
-        ..default()
-    });
+    commands.spawn((
+        Camera3d::default(),
+        Transform::from_xyz(0., 0.0, 3.5).looking_at(Vec3::ZERO, Vec3::Y),
+        Tonemapping::None,
+    ));
     update_count_event.send(UpdateCountEvent(line_count.0));
 }
 
